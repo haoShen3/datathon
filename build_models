@@ -1,1 +1,56 @@
+from sklearn.linear_model import LinearRegression
+from sklearn.feature_extraction.text import CountVectorizer
+import pickle
 
+
+class matrixModel():
+
+    def __init__(self):
+        """
+        vectorizor: vectorizer
+        model: sklearn linear regression model
+        """
+        self.vectorizor = CountVectorizer()
+        self.model = LinearRegression()
+    
+    def vectorizor_fit(self, X):
+        """
+        Fits a vectorizer to the text
+        """
+        self.vectorizor.fit(X)
+
+    def vectorizor_transform(self, X):
+        """
+        Transform the text data to a sparse matrix
+        """
+        vectorizor_transformed = self.vectorizor.transform(X)
+        return vectorizor_transformed
+
+    def model_fit(self, X, Y):
+        """
+        Fits a linearModel to the vectorizer
+        """
+        self.model.fit(X, Y)
+
+    def predict(self, X):
+        """
+        Returns the predicted class
+        """
+        model_pred = self.model.predict(X)
+        return model_pred
+
+    def pickle_vectorizer(self, path='../lib/mode/Vectorizer.pkl'):
+        """
+        Saves the trained vectorizer for future use.
+        """
+        with open(path, 'wb') as f:
+            pickle.dump(self.vectorizor, f)
+            print("Pickled vectorizor at {}".format(path))
+
+    def pickle_model(self, path='../lib/mode/LinearRegression.pkl'):
+        """
+        Saves the trained model for future use.
+        """
+        with open(path, 'wb') as f:
+            pickle.dump(self.model, f)
+            print("Pickled model at {}".format(path))
