@@ -1,1 +1,70 @@
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+from scipy.sparse import csr_matrix
+from build_models import matrixModel
 
+def build_model():
+  df = pd.read_csv('../lib/data/User_Data.csv')
+
+  #得到df的行数和列数
+  # print(df.shape[0])
+  # print(df.shape[1])
+  
+  books2017 = df["User Read Books (2017)"]
+  splits2017 = books2017.str.split(',  ')
+  n2017 = books2017.str.len()
+  data_y = df['Average Rating (2017)']
+  #每个人对看的书的总体评价
+  total_y = n2017 * data_y
+  #print(total_y)
+
+  model = matrixModel()
+  model.vectorizor_fit(splits2017)
+  #转变成parse metric
+  bagwords2017 = model.vectorizor_transform(splits2017)
+  #print(bagwords2017.todense())
+  #print(bagwords2017.toarray())
+
+  #训练linear regression model
+  model.model_fit(bagwords2017, total_y)
+  #评估训练集
+  pred = model.predict(bagwords2017)
+  print(model.score(bagwords2017, total_y))
+  
+  #画图
+  plt.scatter(pred, total_y)
+  plt.show()
+
+  #加入用户偏好，对模型修改
+  X = np.hstack((
+      bagwords2017.todense(),
+      np.eye(len(df))
+  ))
+  #压缩稀疏矩阵
+  new_x = csr_matrix(X)
+  model.model_fit(new_x)
+  pred2 = model.predict(new_x)
+  
+  #预测2018年读书的评分
+  books2018 = user['User Read Books (2018)'].str.split(', ')
+  n2018 = books2018.str.len()
+  total = n2017 + n2018
+  bagwords2018 = counter.vectorizor_transform(books2018)
+
+  TEST = np.hstack((
+      bagwords2018.todense(),
+      np.eye(len(user))
+  ))
+  
+  #根据2017年和2018年读书评价的和
+  newY = (model.predict(TEST) + total_y)/total
+  print('Model training complete')
+  pd.DataFrame({'User ID':user['User ID'], 'Average Rating (2018)':newY})
+  
+  model.pickle_vectorizer()
+  model.pickle_model()
+
+if __name__ == '__main__':
+  build_model()
+  
